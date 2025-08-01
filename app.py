@@ -9,7 +9,7 @@ load_dotenv()
 app = Flask(__name__)
 
 client = MongoClient(os.environ.get("MONGO_URI"))
-db = client["review_app"]
+db = client["mongo"]
 reviews = db.reviews
 
 UPLOAD_FOLDER = 'static/review_images'
