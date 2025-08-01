@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Leave a Review</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #fff; margin: 30px;}
+    .star-rating { direction: rtl; display: inline-block; font-size: 2rem;}
+    .star-rating input[type="radio"] { display: none; }
+    .star-rating label {
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+    .star-rating input[type="radio"]:checked ~ label,
+    .star-rating label:hover,
+    .star-rating label:hover ~ label { color: #FFD700; }
+    form { margin-bottom: 16px;}
+    input, textarea, button { margin-bottom: 10px; width: 100%; max-width: 300px; }
+    button { background: #0796ec; color: #fff; border: none; border-radius: 4px; padding: 8px; cursor: pointer;}
+    button:hover { background: #055e9a;}
+    .review { margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 6px;}
+    .review span { color:#FFD700; font-size:1.3em;}
+    .review img { max-width:80px; max-height:80px; border-radius:10px; margin-right:10px;}
+  </style>
+</head>
+<body>
+  <h2>Leave a Review for Product {{ product_id }}</h2>
+  <form id="review-form" enctype="multipart/form-data" autocomplete="off">
+    <input type="text" name="name" placeholder="Your Name" required /><br>
+    <div class="star-rating">
+      <input type="radio" id="star5" name="rating" value="5" required /><label for="star5">&#9733;</label>
+      <input type="radio" id="star4" name="rating" value="4" /><label for="star4">&#9733;</label>
+      <input type="radio" id="star3" name="rating" value="3" /><label for="star3">&#9733;</label>
+      <input type="radio" id="star2" name="rating" value="2" /><label for="star2">&#9733;</label>
+      <input type="radio" id="star1" name="rating" value="1" /><label for="star1">&#9733;</label>
+    </div><br>
+    <textarea name="message" placeholder="Your Review" required></textarea><br>
+    <input type="file" name="image" accept="image/*" /><br>
+    <input type="hidden" name="product_id" value="{{ product_id }}">
+    <button type="submit">Submit Review</button>
+  </form>
+  <div id="msg" style="color:green;font-weight:bold;"></div>
+  <h3>Approved Reviews</h3>
+  <div id="review-list"></div>
+  <script>
+    document.getElementById('review-form').onsubmit = async function(e){
+      e.preventDefault();
+      document.getElementById('msg').innerText = '';
+      let formData = new FormData(e.target);
+      if (!formData.get("rating")) {
+        alert('Please select a star rating!');
+        return;
+      }
+      try {
+        let res = await fetch('/api/review', {
+          method: 'POST',
+          body: formData
+        });
+        let data = await res.json();
+        if (res.ok) {
+          document.getElementById('msg').innerText = data.message || 'Review Submitted!';
+          e.target.reset();
+          loadReviews(); // Form submit ke baad reviews reload karen
+        } else {
+          document.getElementById('msg').innerText = data.message || 'Error submitting review.';
+        }
+      } catch (err) {
+        document.getElementById('msg').innerText = 'Something went wrong!';
+      }
+    };
+    function loadReviews() {
+      fetch('/api/reviews/{{ product_id }}')
+        .then(res => res.json())
+        .then(reviews => {
+          let list = document.getElementById('review-list');
+          list.innerHTML = "";
+          reviews.forEach(rev => {
+            let stars = '<span>' + '★'.repeat(rev.rating) + '</span>';
+            let img = rev.image_url ? `<img src="${rev.image_url}" alt="User Product Pic" />` : '';
+            let div = document.createElement('div');
+            div.className = 'review';
+            div.innerHTML = `${img}<b>${rev.name}</b> ${stars}<br>${rev.message}`;
+            list.appendChild(div);
+          });
+        });
+    }
+    loadReviews();
+  </script>
+</body>
+</html>
