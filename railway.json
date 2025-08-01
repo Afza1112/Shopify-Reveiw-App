@@ -1,0 +1,19 @@
+{
+  "build": {
+    "env": {
+      "PYTHONUNBUFFERED": "1"
+    },
+    "command": "pip install -r requirements.txt"
+  },
+  "deploy": {
+    "startCommand": "gunicorn app:app",
+    "healthcheckPath": "/"
+  },
+  "services": [
+    {
+      "name": "web",
+      "port": 5000,
+      "startCommand": "gunicorn app:app"
+    }
+  ]
+}
