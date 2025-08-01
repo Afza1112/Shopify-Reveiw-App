@@ -15,5 +15,11 @@
       "port": 5000,
       "startCommand": "gunicorn app:app"
     }
+  ],
+  "watchPaths": [
+    "app.py",
+    "requirements.txt",
+    "templates/**",
+    "static/**"
   ]
 }
