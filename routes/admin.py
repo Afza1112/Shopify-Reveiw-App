@@ -1,15 +1,14 @@
 from flask import Blueprint, render_template, redirect, url_for, request
-from models.review import reviews
-from bson.objectid import ObjectId
-from models.review import reviews
-
+from models.review import get_pending_reviews, approve_review_db
+from bson.objectid import ObjectId  # Only if you need for extra manual queries (not in this code)
 
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin')
-def admin():
+def admin_panel():
     try:
-        pending = list(reviews.find({"approved": False}))
+        # Use the helper function to get pending reviews (NO direct db/reviews usage!)
+        pending = get_pending_reviews()
         for r in pending:
             r['_id'] = str(r.get('_id', ''))
         return render_template("admin.html", reviews=pending)
@@ -19,8 +18,8 @@ def admin():
 @admin_bp.route('/admin/approve/<review_id>', methods=['POST'])
 def approve_review(review_id):
     try:
-        reviews.update_one({"_id": ObjectId(review_id)}, {"$set": {"approved": True}})
-        return redirect(url_for('admin.admin'))
+        # Use the helper function to approve review
+        approve_review_db(review_id)
+        return redirect(url_for('admin.admin_panel'))
     except Exception as e:
         return f"Approval Error: {str(e)}", 500
-
