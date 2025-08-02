@@ -8,4 +8,7 @@ def create_app():
     register_blueprints(app)
     return app
 
+app = create_app()  # <-- This line is crucial for Gunicorn/production
 
+if __name__ == '__main__':
+    app.run(debug=True)
