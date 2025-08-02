@@ -6,14 +6,14 @@
     "command": "pip install -r requirements.txt"
   },
   "deploy": {
-    "startCommand": "gunicorn app:app",
+    "startCommand": "gunicorn \"app:create_app()\"",
     "healthcheckPath": "/"
   },
   "services": [
     {
       "name": "web",
       "port": 5000,
-      "startCommand": "gunicorn app:create_app()"
+      "startCommand": "gunicorn \"app:create_app()\""
     }
   ],
   "watchPaths": [
