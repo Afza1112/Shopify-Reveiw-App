@@ -13,7 +13,7 @@
     {
       "name": "web",
       "port": 5000,
-      "startCommand": "gunicorn app:app"
+      "startCommand": "gunicorn app:create_app()"
     }
   ],
   "watchPaths": [
