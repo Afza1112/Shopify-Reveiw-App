@@ -8,6 +8,7 @@ import os, time
 load_dotenv()
 app = Flask(__name__)
 
+# Use "mongo" for Railway default database name!
 client = MongoClient(os.environ.get("MONGO_URI"))
 db = client["mongo"]
 reviews = db.reviews
@@ -37,10 +38,11 @@ def submit_review():
         file = request.files['image']
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            filename = f"{int(time.time())}_{filename}"  # To avoid overwrite
+            filename = f"{int(time.time())}_{filename}"  # Unique name to avoid overwrite
             save_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(save_path)
-            image_url = url_for('static', filename='review_images/' + filename, _external=True)
+            # FORCE HTTPS for all image URLs!
+            image_url = url_for('static', filename='review_images/' + filename, _external=True, _scheme='https')
     if image_url:
         data['image_url'] = image_url
     reviews.insert_one(data)
