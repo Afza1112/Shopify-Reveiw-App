@@ -1,32 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Admin - Approve Reviews</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin:30px; }
-        .review { margin-bottom:20px; border-bottom:1px solid #ccc; padding-bottom:12px;}
-        .review img { max-width:80px; max-height:80px; border-radius:10px; margin-right:10px;}
-        form { display:inline;}
-        button { background: #34a853; color: #fff; border: none; border-radius: 4px; padding: 6px 14px; cursor: pointer;}
-    </style>
-</head>
-<body>
-    <h2>Pending Reviews</h2>
-    {% for review in reviews %}
-        <div class="review">
-            <b>Product ID:</b> {{ review['product_id'] }} <br>
-            <b>Name:</b> {{ review['name'] }} <br>
-            <b>Rating:</b> {{ review['rating'] }} <br>
-            <b>Message:</b> {{ review['message'] }} <br>
-            {% if review['image_url'] %}
-                <img src="{{ review['image_url'] }}" alt="User Product Pic">
-            {% endif %}
-            <form method="POST" action="/admin/approve/{{ review['_id'] }}">
-                <button type="submit">Approve</button>
-            </form>
-        </div>
-    {% else %}
-        <p>No pending reviews.</p>
-    {% endfor %}
-</body>
-</html>
+{% extends 'base.html' %}
+{% block title %}Admin - Approve Reviews{% endblock %}
+
+{% block content %}
+<h2>Pending Reviews</h2>
+{% for review in reviews %}
+  <div class="review admin-review">
+    <b>Product ID:</b> {{ review['product_id'] }} <br>
+    <b>Name:</b> {{ review['name'] }} <br>
+    <b>Rating:</b> {{ review['rating'] }} <br>
+    <b>Message:</b> {{ review['message'] }} <br>
+    {% if review['image_url'] %}
+      <img src="{{ review['image_url'] }}" alt="User Product Pic" class="review-thumb">
+    {% endif %}
+    <form method="POST" action="/admin/approve/{{ review['_id'] }}">
+      <button type="submit" class="submit-btn">Approve</button>
+    </form>
+  </div>
+{% else %}
+  <p>No pending reviews.</p>
+{% endfor %}
+{% endblock %}

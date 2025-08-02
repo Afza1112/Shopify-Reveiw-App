@@ -1,134 +1,153 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <title>Leave a Review</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
- <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+{% extends 'base.html' %}
+{% block title %}Leave a Review{% endblock %}
 
-</head>
-<body>
-  <div class="review-card">
-    <h2>Share Your Experience</h2>
-    <form id="review-form" enctype="multipart/form-data" autocomplete="off">
-      <div class="field">
-        <label for="name">Your Name *</label>
-        <input type="text" name="name" id="name" placeholder="Enter your name" required maxlength="32" />
+{% block content %}
+<div class="review-card">
+  <h2>Share Your Experience</h2>
+  <form id="review-form" enctype="multipart/form-data" autocomplete="off">
+    <div class="field">
+      <label for="name">Your Name *</label>
+      <input type="text" name="name" id="name" placeholder="Enter your name" required maxlength="32" />
+    </div>
+    <div class="field">
+      <label for="rating">Rating *</label>
+      <div class="star-rating">
+        <input type="radio" id="star5" name="rating" value="5" required /><label for="star5">&#9733;</label>
+        <input type="radio" id="star4" name="rating" value="4" /><label for="star4">&#9733;</label>
+        <input type="radio" id="star3" name="rating" value="3" /><label for="star3">&#9733;</label>
+        <input type="radio" id="star2" name="rating" value="2" /><label for="star2">&#9733;</label>
+        <input type="radio" id="star1" name="rating" value="1" /><label for="star1">&#9733;</label>
       </div>
-      <div class="field">
-        <label for="rating">Rating *</label>
-        <div class="star-rating">
-          <input type="radio" id="star5" name="rating" value="5" required /><label for="star5">&#9733;</label>
-          <input type="radio" id="star4" name="rating" value="4" /><label for="star4">&#9733;</label>
-          <input type="radio" id="star3" name="rating" value="3" /><label for="star3">&#9733;</label>
-          <input type="radio" id="star2" name="rating" value="2" /><label for="star2">&#9733;</label>
-          <input type="radio" id="star1" name="rating" value="1" /><label for="star1">&#9733;</label>
-        </div>
-      </div>
-      <div class="field">
-        <label for="message">Your Review *</label>
-        <textarea name="message" id="message" placeholder="How was your experience?" required maxlength="500"></textarea>
-      </div>
-      <div class="field">
-        <label for="image">Product Photo (optional)</label>
-        <label class="file-upload-label" for="image">Upload Photo</label>
-        <input type="file" name="image" id="image" accept="image/*" />
-        <img id="img-preview" class="img-preview" src="" style="display:none;" alt="Preview" />
-      </div>
-      <input type="hidden" name="product_id" value="{{ product_id }}">
-      <div class="review-actions">
-        <button class="submit-btn" type="submit">Submit Review</button>
-      </div>
-      <div id="msg" class="msg"></div>
-    </form>
-  </div>
-  <div class="review-list" id="review-list"></div>
-  <script>
-    // IMAGE PREVIEW
-    document.getElementById('image').addEventListener('change', function(e){
-      const file = e.target.files[0];
-      const preview = document.getElementById('img-preview');
-      if(file){
-        const reader = new FileReader();
-        reader.onload = e2 => {
-          preview.src = e2.target.result;
-          preview.style.display = "block";
-        }
-        reader.readAsDataURL(file);
-      }else{
-        preview.style.display = "none";
-      }
-    });
+    </div>
+    <div class="field">
+      <label for="message">Your Review *</label>
+      <textarea name="message" id="message" placeholder="How was your experience?" required maxlength="500"></textarea>
+    </div>
+    <div class="field">
+      <label for="image">Product Photo (optional)</label>
+      <label class="file-upload-label" for="image">Upload Photo</label>
+      <input type="file" name="image" id="image" accept="image/*" />
+      <img id="img-preview" class="img-preview" src="" style="display:none;" alt="Preview" />
+    </div>
+    <input type="hidden" name="product_id" value="{{ product_id }}">
+    <div class="review-actions">
+      <button class="submit-btn" type="submit">Submit Review</button>
+    </div>
+    <div id="msg" class="msg"></div>
+  </form>
+</div>
+<div class="review-list" id="review-list"></div>
 
-    // SUBMIT FORM
-    document.getElementById('review-form').onsubmit = async function(e){
-      e.preventDefault();
-      const msgEl = document.getElementById('msg');
-      msgEl.innerText = "";
-      msgEl.className = "msg";
-      let formData = new FormData(e.target);
-      if (!formData.get("rating")) {
-        msgEl.innerText = "Please select a star rating!";
-        msgEl.classList.add('error');
-        return;
-      }
-      try {
-        let res = await fetch('/api/review', {
-          method: 'POST',
-          body: formData
-        });
-        let data = await res.json();
-        if (res.ok) {
-          msgEl.innerText = data.message || 'Review Submitted!';
-          msgEl.classList.add('success');
-          e.target.reset();
-          document.getElementById('img-preview').style.display="none";
-          loadReviews();
-        } else {
-          msgEl.innerText = data.message || 'Error submitting review.';
-          msgEl.classList.add('error');
-        }
-      } catch (err) {
-        msgEl.innerText = 'Something went wrong!';
-        msgEl.classList.add('error');
-      }
-    };
+<!-- Image popup modal -->
+<div id="img-modal" class="img-modal" style="display:none;">
+  <span id="modal-close" class="modal-close">&times;</span>
+  <img id="modal-img" src="" alt="Review Image">
+</div>
 
-    // MODERN REVIEWS LIST
-    function initials(name){
-      if(!name) return "?";
-      return name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+<script>
+  // IMAGE PREVIEW
+  document.getElementById('image').addEventListener('change', function(e){
+    const file = e.target.files[0];
+    const preview = document.getElementById('img-preview');
+    if(file){
+      const reader = new FileReader();
+      reader.onload = e2 => {
+        preview.src = e2.target.result;
+        preview.style.display = "block";
+      }
+      reader.readAsDataURL(file);
+    }else{
+      preview.style.display = "none";
     }
-    function loadReviews() {
-      fetch('/api/reviews/{{ product_id }}')
-        .then(res => res.json())
-        .then(reviews => {
-          let list = document.getElementById('review-list');
-          list.innerHTML = "";
-          if(!reviews || !reviews.length){
-            list.innerHTML = "<div style='text-align:center; color:#a5a7b6; margin:22px 0'>No reviews yet.</div>";
-            return;
-          }
-          reviews.forEach(rev => {
-            let stars = '<span class="review-stars">' + '★'.repeat(rev.rating) + '</span>';
-            let avatar = rev.image_url 
-              ? `<span class="review-avatar"><img src="${rev.image_url}" alt="User Product Pic" /></span>`
-              : `<span class="review-avatar">${initials(rev.name)}</span>`;
-            let div = document.createElement('div');
-            div.className = 'review';
-            div.innerHTML = `${avatar}
-              <div class="review-main">
-                <div class="review-header">
-                  <span class="review-name">${rev.name || 'Anonymous'}</span>
-                  <span class="verified-badge">Verified Buyer</span>
-                  ${stars}
-                </div>
-                <div class="review-message">${rev.message || ''}</div>
-              </div>`;
-            list.appendChild(div);
+  });
+
+  // SUBMIT FORM
+  document.getElementById('review-form').onsubmit = async function(e){
+    e.preventDefault();
+    const msgEl = document.getElementById('msg');
+    msgEl.innerText = "";
+    msgEl.className = "msg";
+    let formData = new FormData(e.target);
+    if (!formData.get("rating")) {
+      msgEl.innerText = "Please select a star rating!";
+      msgEl.classList.add('error');
+      return;
+    }
+    try {
+      let res = await fetch('/api/review', {
+        method: 'POST',
+        body: formData
+      });
+      let data = await res.json();
+      if (res.ok) {
+        msgEl.innerText = data.message || 'Review Submitted!';
+        msgEl.classList.add('success');
+        e.target.reset();
+        document.getElementById('img-preview').style.display="none";
+        loadReviews();
+      } else {
+        msgEl.innerText = data.message || 'Error submitting review.';
+        msgEl.classList.add('error');
+      }
+    } catch (err) {
+      msgEl.innerText = 'Something went wrong!';
+      msgEl.classList.add('error');
+    }
+  };
+
+  // MODERN REVIEWS LIST + IMAGE POPUP
+  function initials(name){
+    if(!name) return "?";
+    return name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+  }
+  function loadReviews() {
+    fetch('/api/reviews/{{ product_id }}')
+      .then(res => res.json())
+      .then(reviews => {
+        let list = document.getElementById('review-list');
+        list.innerHTML = "";
+        if(!reviews || !reviews.length){
+          list.innerHTML = "<div style='text-align:center; color:#a5a7b6; margin:22px 0'>No reviews yet.</div>";
+          return;
+        }
+        reviews.forEach(rev => {
+          let stars = '<span class="review-stars">' + '★'.repeat(rev.rating) + '</span>';
+          let avatar = rev.image_url 
+            ? `<span class="review-avatar"><img class="review-thumb" src="${rev.image_url}" alt="User Product Pic" data-full="${rev.image_url}" /></span>`
+            : `<span class="review-avatar">${initials(rev.name)}</span>`;
+          let div = document.createElement('div');
+          div.className = 'review';
+          div.innerHTML = `${avatar}
+            <div class="review-main">
+              <div class="review-header">
+                <span class="review-name">${rev.name || 'Anonymous'}</span>
+                <span class="verified-badge">Verified Buyer</span>
+                ${stars}
+              </div>
+              <div class="review-message">${rev.message || ''}</div>
+            </div>`;
+          list.appendChild(div);
+        });
+
+        // Enable thumbnail popup
+        document.querySelectorAll('.review-thumb').forEach(img => {
+          img.addEventListener('click', function(){
+            document.getElementById('modal-img').src = img.dataset.full;
+            document.getElementById('img-modal').style.display = 'flex';
           });
         });
+      });
+  }
+  loadReviews();
+
+  // Image modal close
+  document.getElementById('modal-close').onclick = function(){
+    document.getElementById('img-modal').style.display = 'none';
+  };
+  document.getElementById('img-modal').onclick = function(e){
+    if(e.target === this){
+      this.style.display = 'none';
     }
-    loadReviews();
-  </script>
-</body>
-</html>
+  };
+</script>
+{% endblock %}
