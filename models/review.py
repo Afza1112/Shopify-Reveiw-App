@@ -1,39 +1,79 @@
 import os
+import time
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
+    """Check if filename has an allowed extension."""
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def ensure_upload_folder(app):
+    """Ensure the upload folder exists (called in app.py)."""
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# ---- Setup Mongo Client Once ----
-mongo_uri = os.environ.get('MONGO_URI') or "mongodb://localhost:27017/review_app"
-client = MongoClient(mongo_uri)
-db_name = os.environ.get("DB_NAME", "review_app")
+def get_client():
+    """Get a new Mongo client."""
+    mongo_uri = os.environ.get('MONGO_URI') or "mongodb://localhost:27017/"
+    return MongoClient(mongo_uri)
 
 def get_db():
-    return client[db_name]
+    """Get the correct DB using env DB_NAME or default."""
+    db_name = os.environ.get("DB_NAME") or "review_app"
+    return get_client()[db_name]
 
-# ---- Review CRUD Operations ----
 def insert_review(data):
+    """Insert a new review dict into DB."""
     db = get_db()
     return db.reviews.insert_one(data)
 
 def get_reviews(product_id, approved=True):
+    """Return all approved reviews for a product_id as list (no _id)."""
     db = get_db()
     return list(db.reviews.find(
         {"product_id": str(product_id), "approved": approved},
         {"_id": 0}
     ))
 
+def get_all_reviews(product_id):
+    """Return all reviews (approved & pending) for product_id."""
+    db = get_db()
+    return list(db.reviews.find(
+        {"product_id": str(product_id)}
+    ))
+
 def get_pending_reviews():
+    """Return all reviews not yet approved."""
     db = get_db()
     return list(db.reviews.find({"approved": False}))
 
+def get_review_by_id(review_id):
+    """Return one review by its ObjectId (for admin actions)."""
+    db = get_db()
+    return db.reviews.find_one({"_id": ObjectId(review_id)})
+
 def approve_review_db(review_id):
+    """Mark a review as approved by its ObjectId."""
     db = get_db()
     db.reviews.update_one({"_id": ObjectId(review_id)}, {"$set": {"approved": True}})
+
+def delete_review(review_id):
+    """Delete a review by its ObjectId."""
+    db = get_db()
+    db.reviews.delete_one({"_id": ObjectId(review_id)})
+
+def count_reviews(product_id):
+    """Count all approved reviews for a product_id."""
+    db = get_db()
+    return db.reviews.count_documents({"product_id": str(product_id), "approved": True})
+
+def avg_rating(product_id):
+    """Average rating for a product."""
+    db = get_db()
+    pipeline = [
+        {"$match": {"product_id": str(product_id), "approved": True}},
+        {"$group": {"_id": None, "avg": {"$avg": "$rating"}}}
+    ]
+    result = list(db.reviews.aggregate(pipeline))
+    return result[0]["avg"] if result else None
