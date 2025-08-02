@@ -1,6 +1,8 @@
 from flask import Blueprint, render_template, redirect, url_for, request
 from models.review import reviews
 from bson.objectid import ObjectId
+from models.review import reviews
+
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -21,3 +23,4 @@ def approve_review(review_id):
         return redirect(url_for('admin.admin'))
     except Exception as e:
         return f"Approval Error: {str(e)}", 500
+
