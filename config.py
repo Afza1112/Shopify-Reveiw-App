@@ -1,10 +1,9 @@
+from pymongo import MongoClient
 import os
-from dotenv import load_dotenv
-
-load_dotenv()
 
 class Config:
-    SECRET_KEY = os.getenv("SECRET_KEY", "supersecret")
-    MONGO_URI = os.getenv("MONGO_URI")
-    UPLOAD_FOLDER = os.path.join("static", "review_images")
-    ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'change-this-in-production'
+    MONGO_URI = os.environ.get("MONGO_URI") or "mongodb://localhost:27017/"
+    DB_NAME = os.environ.get("DB_NAME") or "review_app"
+    MONGO_CLIENT = MongoClient(MONGO_URI)
+    UPLOAD_FOLDER = 'static/review_images'
