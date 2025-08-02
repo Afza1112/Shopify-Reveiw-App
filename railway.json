@@ -18,8 +18,11 @@
   ],
   "watchPaths": [
     "app.py",
+    "config.py",
     "requirements.txt",
     "templates/**",
-    "static/**"
+    "static/**",
+    "models/**",
+    "routes/**"
   ]
 }
