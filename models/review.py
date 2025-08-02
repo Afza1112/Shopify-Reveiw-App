@@ -2,9 +2,9 @@ from flask import current_app
 from pymongo import MongoClient
 import os
 def get_db():
-    client = MongoClient(current_app.config['MONGO_URI'])
-    db = client.get_default_database() or client["review_app"]
-    return db
+    db_name = os.environ.get("DB_NAME", "review_app")
+    return client[db_name]
+
 
 def insert_review(data):
     db = get_db()
@@ -33,3 +33,4 @@ def ensure_upload_folder(app):
 client = MongoClient(os.environ.get('MONGO_URI'))
 db = client["mongo"]           # <-- YAHAN "mongo" ya aapki DB ka naam ho
 reviews = db.reviews          # <-- YEH LINE HONI HI CHAHIYE
+
