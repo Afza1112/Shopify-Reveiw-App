@@ -9,9 +9,10 @@
     <b>Name:</b> {{ review['name'] }} <br>
     <b>Rating:</b> {{ review['rating'] }} <br>
     <b>Message:</b> {{ review['message'] }} <br>
-    {% if review['image_url'] %}
-      <img src="{{ review['image_url'] }}" alt="User Product Pic" class="review-thumb">
-    {% endif %}
+   {% if review.get('image_url') %}
+  <img src="{{ review['image_url'] }}" alt="User Product Pic">
+  {% endif %}
+
     <form method="POST" action="/admin/approve/{{ review['_id'] }}">
       <button type="submit" class="submit-btn">Approve</button>
     </form>
