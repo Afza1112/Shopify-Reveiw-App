@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="review-amazon-container">
+    <!-- Average Rating and Breakdown -->
+    <div class="review-summary">
+        <div class="avg-rating">
+            <span class="rating-value">{{ avg_rating }}/5</span>
+            <span class="rating-stars">
+                {% for _ in range(avg_rating|round(0, 'floor')) %}
+                    <span class="star">&#9733;</span>
+                {% endfor %}
+                {% for _ in range(5 - avg_rating|round(0, 'floor')) %}
+                    <span class="star empty">&#9733;</span>
+                {% endfor %}
+            </span>
+            <div class="total-reviews">{{ total_reviews }} global ratings</div>
+        </div>
+        <div class="rating-bars">
+            {% for star in range(5, 0, -1) %}
+            <div class="bar-row">
+                <span class="star-label">{{ star }} star</span>
+                <div class="bar-bg">
+                    <div class="bar-fill" style="width: {{ star_perc[star] }}%"></div>
+                </div>
+                <span class="bar-count">{{ star_perc[star] }}%</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Image Gallery -->
+    <div class="review-images-section">
+        <h3>Reviews with images</h3>
+        <div class="review-images-list">
+            {% for review in reviews if review.image_url %}
+                <img src="{{ review.image_url }}" class="review-img-thumb" onclick="showImgModal(this.src)">
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Review List -->
+    <div class="customer-reviews-list">
+        {% for review in reviews %}
+        <div class="review-item">
+            <div class="review-header">
+                <span class="reviewer-name">{{ review.name }}</span>
+                <span class="review-stars">
+                    {% for _ in range(review.rating|int) %}
+                        <span class="star">&#9733;</span>
+                    {% endfor %}
+                    {% for _ in range(5 - review.rating|int) %}
+                        <span class="star empty">&#9733;</span>
+                    {% endfor %}
+                </span>
+            </div>
+            <div class="review-body">{{ review.text }}</div>
+            {% if review.image_url %}
+                <img src="{{ review.image_url }}" class="review-img-inline">
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal for large image -->
+<div id="imgModal" class="img-modal" onclick="this.style.display='none'">
+    <span class="close">&times;</span>
+    <img id="modalImg" class="modal-content">
+</div>
+
+<script>
+function showImgModal(src) {
+    document.getElementById('modalImg').src = src;
+    document.getElementById('imgModal').style.display = 'block';
+}
+</script>
+{% endblock %}
