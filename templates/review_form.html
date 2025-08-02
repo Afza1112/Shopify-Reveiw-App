@@ -3,80 +3,8 @@
 <head>
   <title>Leave a Review</title>
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <style>
-    body { font-family: 'Inter', Arial, sans-serif; background: #f4f8fb; margin: 0; }
-    .review-card {
-      background: #fff;
-      max-width: 420px;
-      margin: 40px auto 24px;
-      border-radius: 16px;
-      box-shadow: 0 4px 20px rgba(22,34,54,0.07);
-      padding: 32px 28px 18px;
-    }
-    h2 { text-align:center; font-weight:700; font-size:1.5rem; margin:0 0 24px 0; }
-    .field { margin-bottom: 18px; position:relative; }
-    .field label {
-      display: block; font-weight: 600; font-size: 1rem; margin-bottom: 5px;
-      color: #222a34; letter-spacing: 0.01em;
-    }
-    .field input[type="text"],
-    .field textarea {
-      width: 100%; font-size: 1rem; border:1.2px solid #e0e6ed;
-      border-radius:7px; padding:11px 12px; transition: border 0.2s;
-      background: #fafbfc;
-    }
-    .field input[type="text"]:focus,
-    .field textarea:focus { border:1.7px solid #0097cf; outline:none; }
-    .field textarea { min-height: 68px; resize:vertical; }
-    .star-rating {
-      direction: rtl; display:flex; justify-content:left; gap:2px; font-size: 2rem; margin: 4px 0 6px 0;
-    }
-    .star-rating input[type="radio"] { display:none; }
-    .star-rating label {
-      color: #d2dae3; cursor:pointer; transition: color 0.19s;
-    }
-    .star-rating input[type="radio"]:checked ~ label,
-    .star-rating label:hover,
-    .star-rating label:hover ~ label { color: #FFD700; }
-    .field input[type="file"] { display:none; }
-    .file-upload-label {
-      display: inline-block; background:#e9efff; color:#2473e6; padding:7px 19px;
-      border-radius: 6px; font-weight:600; cursor:pointer; font-size: 1rem;
-      transition: background .2s;
-    }
-    .file-upload-label:hover { background: #d1e4ff; }
-    .img-preview {
-      display:block; margin:12px 0 0 0; width:70px; height:70px; object-fit:cover; border-radius:11px; box-shadow:0 2px 8px #0001;
-    }
-    .review-actions { text-align:center; margin-top: 24px; }
-    .submit-btn {
-      padding:12px 0; width:100%; border-radius: 7px;
-      background: linear-gradient(90deg,#29b6f6,#00c7b2);
-      border:none; color:#fff; font-weight:700; font-size:1.1rem; cursor:pointer;
-      box-shadow: 0 2px 8px #00bcd41a; transition:background 0.19s;
-      margin-top:2px;
-    }
-    .submit-btn:hover { background: linear-gradient(90deg,#0a9ae3,#00b79a);}
-    .msg { text-align:center; margin:17px 0 0 0; font-weight:600; font-size:1.04rem;}
-    .msg.success { color:#10b657;}
-    .msg.error { color:#d33a2c;}
-    @media(max-width:600px){
-      .review-card {padding:18px 7px 10px;}
-      .review-list {margin: 7px 0;}
-    }
-    .review-list {max-width: 520px; margin: 32px auto;}
-    .review {background:#fff; border-radius:15px; box-shadow:0 2px 9px #0013; display:flex; gap:13px; align-items:flex-start; padding:13px 15px 13px 13px; margin-bottom: 20px;}
-    .review-avatar {
-      width:56px; height:56px; border-radius:12px; background:#e4ecf7; display:flex; align-items:center; justify-content:center; font-size:1.65rem; color:#4677b1; font-weight:600; flex-shrink:0; overflow:hidden;
-    }
-    .review-avatar img { width:100%; height:100%; object-fit:cover; border-radius:12px;}
-    .review-main { flex:1; }
-    .review-header {display:flex; align-items:center; gap:11px; margin-bottom:3px;}
-    .review-name {font-weight:700; font-size:1.1rem;}
-    .review-stars {color:#FFD700; font-size:1.19rem;}
-    .review-message {margin:3px 0 0 0; font-size:1.03rem; color:#222a38;}
-    .verified-badge { display:inline-block; background:#d1fadd; color:#17b36d; border-radius:4px; font-size:0.95em; padding:2px 7px; margin-left:7px; vertical-align:middle; font-weight:600; }
-  </style>
+ <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+
 </head>
 <body>
   <div class="review-card">
