@@ -35,3 +35,17 @@ def submit_review():
 def api_reviews(product_id):
     reviews = get_reviews(product_id, approved=True)
     return jsonify(reviews)
+    
+@main_bp.route('/review/<product_id>')
+def review_amazon(product_id):
+    reviews = get_reviews(product_id, approved=True)
+    avg_rating, total_reviews, star_perc = get_review_summary(reviews)
+    # convert perc to {5: %, 4: %, ...}
+    star_perc = {k: star_perc.get(k, 0) for k in range(5, 0, -1)}
+    return render_template(
+        "reviews_amazon.html",
+        reviews=reviews,
+        avg_rating=avg_rating,
+        total_reviews=total_reviews,
+        star_perc=star_perc
+    )
