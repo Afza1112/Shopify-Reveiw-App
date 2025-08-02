@@ -66,19 +66,6 @@ def get_review_summary(reviews):
     perc = {s: round(star_counts[s] * 100 / total) if total else 0 for s in range(1, 6)}
     return avg, total, perc
 
-@main_bp.route('/review/<product_id>')
-def review_amazon(product_id):
-    reviews = get_reviews(product_id, approved=True)
-    avg_rating, total_reviews, star_perc = get_review_summary(reviews)
-    # convert perc to {5: %, 4: %, ...}
-    star_perc = {k: star_perc.get(k, 0) for k in range(5, 0, -1)}
-    return render_template(
-        "reviews_amazon.html",
-        reviews=reviews,
-        avg_rating=avg_rating,
-        total_reviews=total_reviews,
-        star_perc=star_perc
-    )
 
 def delete_review(review_id):
     """Delete a review by its ObjectId."""
@@ -99,4 +86,5 @@ def avg_rating(product_id):
     ]
     result = list(db.reviews.aggregate(pipeline))
     return result[0]["avg"] if result else None
+
 
