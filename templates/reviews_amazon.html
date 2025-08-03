@@ -91,27 +91,37 @@
 
 <!-- REVIEW MODAL -->
 <div id="review-modal" class="modal" style="display:none;">
-  <div class="modal-content">
+  <div class="modal-content" style="max-width: 420px; width:90%;">
     <span class="close" onclick="document.getElementById('review-modal').style.display='none'">&times;</span>
     <form id="review-form" enctype="multipart/form-data" autocomplete="off">
-      <label for="name">Your Name:</label>
-      <input type="text" name="name" required maxlength="32">
-      <label for="rating">Rating:</label>
-      <select name="rating" required>
-        <option value="">Select...</option>
-        {% for i in range(5,0,-1) %}
-          <option value="{{ i }}">{{ i }} star</option>
-        {% endfor %}
-      </select>
-      <label for="text">Your Review:</label>
-      <textarea name="text" required maxlength="1000"></textarea>
-      <label for="image">Photo (optional):</label>
-      <input type="file" name="image" accept="image/*">
-      <button type="submit" class="submit-btn" style="margin-top:14px;">Submit Review</button>
+      <div class="field">
+        <label for="name">Your Name:</label>
+        <input type="text" name="name" required maxlength="32">
+      </div>
+      <div class="field">
+        <label for="rating">Rating:</label>
+        <div class="star-rating">
+          {% for i in range(5,0,-1) %}
+            <input type="radio" id="star{{ i }}" name="rating" value="{{ i }}">
+            <label for="star{{ i }}" title="{{ i }} star">&#9733;</label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="field">
+        <label for="text">Your Review:</label>
+        <textarea name="text" required maxlength="1000"></textarea>
+      </div>
+      <div class="field">
+  <label for="image">Photo (optional):</label>
+  <label class="file-upload-label" for="image">Upload Photo</label>
+  <input type="file" name="image" id="image" accept="image/*">
+</div>
+      <button type="submit" class="submit-btn" style="margin-top:12px;">Submit Review</button>
     </form>
     <div id="review-msg" class="msg"></div>
   </div>
 </div>
+
 
 <!-- IMAGE MODAL for enlarged image -->
 <div id="img-modal" class="img-modal" onclick="closeImgModal()">
@@ -147,3 +157,4 @@ function closeImgModal() {
 }
 </script>
 {% endblock %}
+
