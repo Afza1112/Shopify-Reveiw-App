@@ -1,19 +1,15 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <title>{{ title or 'Shopify Review App' }}</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <meta charset="utf-8">
+    <title>{{ title or 'Product Reviews' }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
 </head>
 <body>
-  <div class="container">
-    <h1>Shopify Review App</h1>
-    <nav>
-      <a href="/review/123">Sample Product Review Form</a> |
-      <a href="/admin">Admin</a> |
-      <a href="/reviews/amazon/123">Amazon Style Reviews (Demo)</a>
-    </nav>
-    {% block content %}{% endblock %}
-  </div>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
 </body>
 </html>
+
+
