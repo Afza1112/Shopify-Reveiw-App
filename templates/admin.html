@@ -110,7 +110,8 @@
                     </form>
                   {% endif %}
                   <!-- Amend/Reply modal triggers (could be modals, or link to a page) -->
-                  <a href="#" class="admin-action-link" onclick="openAmendModal('{{ review._id }}', '{{ review.text|escapejs or review.message|escapejs }}');return false;">Amend</a>
+                  <a href="#" class="admin-action-link" onclick="openAmendModal('{{ review._id }}', {{ (review.text or review.message)|tojson }});return false;">Amend</a>
+
                   <a href="#" class="admin-action-link reply" onclick="openReplyModal('{{ review._id }}');return false;">Reply</a>
                   <form method="POST" action="{{ url_for('admin.delete_review_admin', review_id=review._id) }}" onsubmit="return confirm('Delete this review?');">
                     <button type="submit" class="admin-action-link delete">Delete</button>
