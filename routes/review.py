@@ -1,109 +1,139 @@
 import os
 import time
-from pymongo import MongoClient
-from bson.objectid import ObjectId
+from flask import Blueprint, render_template, request, jsonify, current_app, url_for, redirect, flash
+from werkzeug.utils import secure_filename
+from models.review import (
+    insert_review, get_reviews, get_pending_reviews, get_review_by_id,
+    approve_review_db, reject_review_db, amend_review_db, reply_review_db,
+    delete_review, get_all_reviews
+)
 
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+review_bp = Blueprint('review', __name__)
 
 def allowed_file(filename):
-    """Check if filename has an allowed extension."""
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and \
+        filename.rsplit('.', 1)[1].lower() in current_app.config.get("ALLOWED_EXTENSIONS", {'png','jpg','jpeg','gif'})
 
-def ensure_upload_folder(app):
-    """Ensure the upload folder exists (call in app.py)."""
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+# ----- CUSTOMER FACING -----
 
-def get_client():
-    """Get a new Mongo client."""
-    mongo_uri = os.environ.get('MONGO_URI') or "mongodb://localhost:27017/"
-    return MongoClient(mongo_uri)
-
-def get_db():
-    """Get the correct DB using env DB_NAME or default."""
-    db_name = os.environ.get("DB_NAME") or "review_app"
-    return get_client()[db_name]
-
-def insert_review(data):
-    """Insert a new review dict into DB."""
-    db = get_db()
-    data.setdefault("approved", False)
-    data.setdefault("rejected", False)
-    data.setdefault("admin_reply", "")
-    data.setdefault("created_at", int(time.time()))
-    return db.reviews.insert_one(data)
-
-def get_reviews(product_id, approved=True):
-    """Return all approved (not rejected) reviews for a product_id as list (no _id)."""
-    db = get_db()
-    return list(db.reviews.find(
-        {"product_id": str(product_id), "approved": approved, "rejected": False},
-        {"_id": 0}
-    ))
-
-def get_all_reviews():
-    """Return all reviews (admin table; all products, newest first)."""
-    db = get_db()
-    return list(db.reviews.find().sort([("created_at", -1)]))
-
-def get_pending_reviews():
-    """Return all reviews not yet approved (not rejected)."""
-    db = get_db()
-    return list(db.reviews.find({"approved": False, "rejected": {"$ne": True}}).sort([("created_at", -1)]))
-
-def get_review_by_id(review_id):
-    """Return one review by its ObjectId (for admin actions)."""
-    db = get_db()
-    return db.reviews.find_one({"_id": ObjectId(review_id)})
-
-def approve_review_db(review_id):
-    """Mark a review as approved by its ObjectId."""
-    db = get_db()
-    db.reviews.update_one({"_id": ObjectId(review_id)}, {"$set": {"approved": True, "rejected": False}})
-
-def reject_review_db(review_id):
-    """Mark a review as rejected (will not show on frontend)."""
-    db = get_db()
-    db.reviews.update_one({"_id": ObjectId(review_id)}, {"$set": {"approved": False, "rejected": True}})
-
-def amend_review_db(review_id, new_text):
-    """Edit/amend a review text by admin."""
-    db = get_db()
-    db.reviews.update_one({"_id": ObjectId(review_id)}, {"$set": {"text": new_text}})
-
-def reply_review_db(review_id, reply_text):
-    """Admin reply to a customer review."""
-    db = get_db()
-    db.reviews.update_one({"_id": ObjectId(review_id)}, {"$set": {"admin_reply": reply_text}})
-
-def delete_review(review_id):
-    """Delete a review by its ObjectId."""
-    db = get_db()
-    db.reviews.delete_one({"_id": ObjectId(review_id)})
-
-def count_reviews(product_id):
-    """Count all approved reviews for a product_id."""
-    db = get_db()
-    return db.reviews.count_documents({"product_id": str(product_id), "approved": True, "rejected": False})
-
-def avg_rating(product_id):
-    """Average rating for a product."""
-    db = get_db()
-    pipeline = [
-        {"$match": {"product_id": str(product_id), "approved": True, "rejected": False}},
-        {"$group": {"_id": None, "avg": {"$avg": "$rating"}}}
-    ]
-    result = list(db.reviews.aggregate(pipeline))
-    return result[0]["avg"] if result else None
-
-def get_review_summary(reviews):
-    """Return average, total, and star breakdown from reviews list."""
-    total = len(reviews)
-    star_counts = {s: 0 for s in range(1, 6)}
+@review_bp.route('/review/<product_id>')
+def review_form(product_id):
+    """Show the public review form for a product."""
+    reviews = get_reviews(product_id, approved=True)
+    avg_rating = 0
+    if reviews:
+        avg_rating = round(sum(int(r.get('rating', 0)) for r in reviews) / len(reviews), 2)
+    star_counts = {i: 0 for i in range(1, 6)}
     for r in reviews:
-        # Accept both string and int ratings for legacy support
-        rating = int(r['rating']) if 'rating' in r else 0
+        rating = int(r.get("rating", 0))
         if 1 <= rating <= 5:
             star_counts[rating] += 1
-    avg = round(sum(int(r['rating']) for r in reviews) / total, 2) if total else 0
-    perc = {s: round(star_counts[s] * 100 / total) if total else 0 for s in range(1, 6)}
-    return avg, total, perc
+    star_perc = {k: round((v / len(reviews)) * 100, 1) if reviews else 0 for k, v in star_counts.items()}
+
+    return render_template(
+        'reviews_amazon.html',
+        reviews=reviews,
+        avg_rating=avg_rating,
+        total_reviews=len(reviews),
+        star_perc=star_perc,
+        product_id=product_id
+    )
+
+@review_bp.route('/api/review', methods=['POST'])
+def submit_review():
+    """API to submit a review (handles optional image)."""
+    data = request.form.to_dict()
+    data['approved'] = False
+    data['rejected'] = False
+    data['admin_reply'] = ""
+    data['created_at'] = int(time.time())
+    image_url = ""
+    product_id = data.get("product_id")
+    if 'image' in request.files and request.files['image'].filename != '':
+        file = request.files['image']
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filename = f"{int(time.time())}_{filename}"
+            save_path = os.path.join(current_app.config['UPLOAD_FOLDER'], filename)
+            os.makedirs(current_app.config['UPLOAD_FOLDER'], exist_ok=True)
+            file.save(save_path)
+            image_url = url_for('static', filename=f'review_images/{filename}', _external=True)
+    if image_url:
+        data['image_url'] = image_url
+    insert_review(data)
+    return jsonify({"message": "Review submitted, pending approval."})
+
+@review_bp.route('/api/reviews/<product_id>')
+def api_reviews(product_id):
+    """API to fetch all approved reviews for product."""
+    reviews = get_reviews(product_id, approved=True)
+    return jsonify(reviews)
+
+# ----- ADMIN PANEL ROUTES (MODERATION) -----
+
+@review_bp.route('/admin/approve/<review_id>', methods=['POST'])
+def approve_review(review_id):
+    approve_review_db(review_id)
+    flash("Review approved.", "success")
+    return redirect(request.referrer or url_for('admin.admin_panel'))
+
+@review_bp.route('/admin/reject/<review_id>', methods=['POST'])
+def reject_review(review_id):
+    reject_review_db(review_id)
+    flash("Review rejected.", "info")
+    return redirect(request.referrer or url_for('admin.admin_panel'))
+
+@review_bp.route('/admin/amend/<review_id>', methods=['POST'])
+def amend_review(review_id):
+    new_text = request.form.get('amend_text', '').strip()
+    if not new_text:
+        flash("Amendment text cannot be empty.", "warning")
+        return redirect(request.referrer or url_for('admin.admin_panel'))
+    amend_review_db(review_id, new_text)
+    flash("Review amended.", "success")
+    return redirect(request.referrer or url_for('admin.admin_panel'))
+
+@review_bp.route('/admin/reply/<review_id>', methods=['POST'])
+def reply_review(review_id):
+    reply_text = request.form.get('reply_text', '').strip()
+    if not reply_text:
+        flash("Reply cannot be empty.", "warning")
+        return redirect(request.referrer or url_for('admin.admin_panel'))
+    reply_review_db(review_id, reply_text)
+    flash("Reply sent.", "success")
+    return redirect(request.referrer or url_for('admin.admin_panel'))
+
+@review_bp.route('/admin/delete/<review_id>', methods=['POST'])
+def delete_review_admin(review_id):
+    delete_review(review_id)
+    flash("Review deleted.", "danger")
+    return redirect(request.referrer or url_for('admin.admin_panel'))
+
+# ----- OPTIONAL: For admin page with all reviews -----
+
+@review_bp.route('/admin/all')
+def all_reviews():
+    """Show all reviews (approved + pending) for admin."""
+    reviews = get_all_reviews()
+    for r in reviews:
+        r['_id'] = str(r.get('_id', ''))
+    return render_template("admin.html", reviews=reviews, show_all=True)
+
+# ----- OPTIONAL: Edit review GET (for admin) -----
+
+@review_bp.route('/admin/edit/<review_id>', methods=['GET', 'POST'])
+def edit_review(review_id):
+    review = get_review_by_id(review_id)
+    if not review:
+        flash("Review not found.", "danger")
+        return redirect(url_for('admin.admin_panel'))
+    if request.method == 'POST':
+        new_text = request.form.get('edit_text', '').strip()
+        amend_review_db(review_id, new_text)
+        flash("Review updated.", "success")
+        return redirect(url_for('admin.admin_panel'))
+    review['_id'] = str(review.get('_id', ''))
+    return render_template("edit_review.html", review=review)
+
+# Export Blueprint for app use
+__all__ = ["review_bp"]
