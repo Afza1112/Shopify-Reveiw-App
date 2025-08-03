@@ -29,4 +29,6 @@ def review_amazon(product_id):
         avg_rating=avg_rating,
         total_reviews=total_reviews,
         star_perc=star_perc
+        product_id=product_id
     )
+
