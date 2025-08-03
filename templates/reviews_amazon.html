@@ -1,93 +1,121 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="amazon-reviews-box">
-    <h2>Customer reviews</h2>
+
+    <!-- Header -->
+    <h2 style="margin-top:0;">Customer reviews</h2>
+
+    <!-- Review this product box -->
     <div class="review-product-box">
-    <h2>Review this product</h2>
-    <p>Share your thoughts with other customers</p>
-    <button class="amazon-review-btn" onclick="document.getElementById('review-modal').style.display='block'">
-        Write a customer review
-    </button>
-</div>
+        <h3>Review this product</h3>
+        <p>Share your thoughts with other customers</p>
+        <button class="amazon-review-btn" type="button"
+            onclick="document.getElementById('review-modal').style.display='flex'">
+            Write a customer review
+        </button>
+    </div>
 
-<!-- Review Modal -->
-<div id="review-modal" class="modal" style="display:none;">
-  <div class="modal-content">
-    <span class="close" onclick="document.getElementById('review-modal').style.display='none'">&times;</span>
-    <form id="review-form" enctype="multipart/form-data">
-        <label>Name:</label>
-        <input type="text" name="name" required><br>
-        <label>Rating:</label>
-        <select name="rating" required>
-            <option value="">Select...</option>
-            {% for i in range(5,0,-1) %}
-                <option value="{{ i }}">{{ i }} star</option>
-            {% endfor %}
-        </select><br>
-        <label>Review:</label>
-        <textarea name="text" required></textarea><br>
-        <label>Photo (optional):</label>
-        <input type="file" name="image"><br>
-        <button type="submit">Submit</button>
-    </form>
-    <div id="review-msg"></div>
-  </div>
-</div>
+    <!-- Review Modal -->
+    <div id="review-modal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close" tabindex="0" onclick="closeModal()" aria-label="Close">&times;</span>
+            <form id="review-form" enctype="multipart/form-data" autocomplete="off">
+                <label>Name:</label>
+                <input type="text" name="name" maxlength="32" required><br>
+                <label>Rating:</label>
+                <select name="rating" required>
+                    <option value="">Select...</option>
+                    {% for i in range(5,0,-1) %}
+                        <option value="{{ i }}">{{ i }} star{{ 's' if i > 1 else '' }}</option>
+                    {% endfor %}
+                </select><br>
+                <label>Review:</label>
+                <textarea name="text" maxlength="1000" required></textarea><br>
+                <label>Photo (optional):</label>
+                <input type="file" name="image" accept="image/*"><br>
+                <button type="submit" class="amazon-review-btn">Submit</button>
+            </form>
+            <div id="review-msg" style="margin-top:8px;color:#008000;"></div>
+        </div>
+    </div>
 
+    <!-- Summary -->
     <div class="amazon-summary">
-        <span style="font-size:2rem;">{{ avg_rating }} out of 5</span>
+        <span style="font-size:2rem;font-weight:bold;">{{ avg_rating or 0 }} out of 5</span>
         <span class="star-bar">
             {% for i in range(1,6) %}
-                {% if i <= avg_rating|round(0, 'floor') %}
-                    <span style="color:orange;">&#9733;</span>
+                {% if i <= (avg_rating|float|round(0, 'floor')) %}
+                    <span style="color:orange;font-size:1.4em;">&#9733;</span>
                 {% else %}
-                    <span style="color:#ddd;">&#9733;</span>
+                    <span style="color:#ddd;font-size:1.4em;">&#9733;</span>
                 {% endif %}
             {% endfor %}
         </span>
-        <div>{{ total_reviews }} global ratings</div>
+        <div>{{ total_reviews or 0 }} global ratings</div>
     </div>
     <div class="star-breakdown">
         {% for i in range(5, 0, -1) %}
             <div>
                 <span>{{ i }} star</span>
                 <div class="star-bar-bg">
-                    <div class="star-bar-fill" style="width:{{ star_perc[i] }}%"></div>
+                    <div class="star-bar-fill" style="width:{{ star_perc[i]|default(0) }}%"></div>
                 </div>
-                <span>{{ star_perc[i] }}%</span>
+                <span>{{ star_perc[i]|default(0) }}%</span>
             </div>
         {% endfor %}
     </div>
-    <h3>Reviews with images</h3>
-    <div class="amazon-images-row">
-        {% for review in reviews if review.image_url %}
-            <img src="{{ review.image_url }}" alt="review image" style="width:120px;height:120px;object-fit:cover;margin:6px;">
-        {% endfor %}
-    </div>
-    <h3>All Reviews</h3>
-    {% for review in reviews %}
-        <div class="review-item">
-            <div><strong>{{ review.name or "Anonymous" }}</strong>
-                <span class="star-bar">
-                {% for i in range(1,6) %}
-                    {% if i <= review.rating|int %}
-                        <span style="color:orange;">&#9733;</span>
-                    {% else %}
-                        <span style="color:#ddd;">&#9733;</span>
-                    {% endif %}
-                {% endfor %}
-                </span>
-            </div>
-            <div>{{ review.text }}</div>
-            {% if review.image_url %}
-                <img src="{{ review.image_url }}" alt="review image" style="width:80px;">
-            {% endif %}
+
+    <!-- Reviews with images -->
+    {% set image_reviews = reviews|selectattr("image_url")|list %}
+    {% if image_reviews %}
+        <h3>Reviews with images</h3>
+        <div class="amazon-images-row">
+            {% for review in image_reviews %}
+                <img src="{{ review.image_url }}" alt="review image" style="width:120px;height:120px;object-fit:cover;margin:6px;border-radius:4px;">
+            {% endfor %}
         </div>
-    {% endfor %}
+    {% endif %}
+
+    <!-- All Reviews -->
+    <h3>All Reviews</h3>
+    {% if reviews %}
+        {% for review in reviews %}
+            <div class="review-item" style="margin-bottom:18px;">
+                <div>
+                    <strong>{{ review.name or "Anonymous" }}</strong>
+                    <span class="star-bar">
+                        {% for i in range(1,6) %}
+                            {% if i <= (review.rating|int) %}
+                                <span style="color:orange;">&#9733;</span>
+                            {% else %}
+                                <span style="color:#ddd;">&#9733;</span>
+                            {% endif %}
+                        {% endfor %}
+                    </span>
+                </div>
+                <div style="margin:4px 0 6px;">{{ review.text }}</div>
+                {% if review.image_url %}
+                    <img src="{{ review.image_url }}" alt="review image" style="width:80px;object-fit:cover;border-radius:3px;">
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div style="color:#888;">No reviews yet. Be the first to review!</div>
+    {% endif %}
 </div>
 {% endblock %}
 
+{% block scripts %}
 <script>
+// Modal controls
+function closeModal() {
+    document.getElementById('review-modal').style.display = 'none';
+}
+// Accessibility: allow closing modal with Esc key
+document.addEventListener('keydown', function(e){
+    if(e.key === "Escape") closeModal();
+});
+// Submit review form
 document.getElementById('review-form').onsubmit = async function(e) {
     e.preventDefault();
     var formData = new FormData(this);
@@ -99,9 +127,10 @@ document.getElementById('review-form').onsubmit = async function(e) {
     document.getElementById('review-msg').innerText = data.message || "Submitted!";
     if(data.message && data.message.includes("pending")) {
         setTimeout(() => {
-            document.getElementById('review-modal').style.display='none';
+            closeModal();
             location.reload();
-        }, 1800);
+        }, 1500);
     }
 };
 </script>
+{% endblock %}
