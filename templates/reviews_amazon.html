@@ -116,6 +116,7 @@
   <label class="file-upload-label" for="image">Upload Photo</label>
   <input type="file" name="image" id="image" accept="image/*">
 </div>
+      <input type="hidden" name="product_id" value="{{ product_id }}">
       <button type="submit" class="submit-btn" style="margin-top:12px;">Submit Review</button>
     </form>
     <div id="review-msg" class="msg"></div>
@@ -157,4 +158,5 @@ function closeImgModal() {
 }
 </script>
 {% endblock %}
+
 
