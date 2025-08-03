@@ -1,15 +1,68 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>{{ title or 'Product Reviews' }}</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-</head>
-<body>
-    <div class="container">
-        {% block content %}{% endblock %}
+{% extends "base.html" %}
+{% block content %}
+<div class="amazon-page">
+  <div class="amazon-columns">
+    <!-- Left Panel -->
+    <div class="left-panel">
+      <h2>Customer reviews</h2>
+      <div class="rating-summary">
+        <span class="avg-rating">{{ avg_rating }} out of 5</span>
+        <span class="stars">
+          {% for i in range(1,6) %}
+            <span style="color:{{ 'orange' if i <= avg_rating|round(0,'floor') else '#ddd' }}">&#9733;</span>
+          {% endfor %}
+        </span>
+      </div>
+      <div class="ratings-bar">
+        {% for i in range(5, 0, -1) %}
+        <div class="star-row">
+          <span>{{ i }} star</span>
+          <div class="bar-bg">
+            <div class="bar-fill" style="width:{{ star_perc[i] }}%"></div>
+          </div>
+          <span>{{ star_perc[i] }}%</span>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="review-this-product">
+        <h3>Review this product</h3>
+        <p>Share your thoughts with other customers</p>
+        <button class="amazon-review-btn" onclick="document.getElementById('review-modal').style.display='block'">
+          Write a customer review
+        </button>
+      </div>
     </div>
-</body>
-</html>
 
-
+    <!-- Right Panel -->
+    <div class="right-panel">
+      <h3>Reviews with images</h3>
+      <div class="review-images">
+        {% for review in reviews if review.image_url %}
+        <img src="{{ review.image_url }}" alt="review image" class="review-img">
+        {% endfor %}
+      </div>
+      <h3>All Reviews</h3>
+      {% for review in reviews %}
+      <div class="review-card">
+        <div class="review-header">
+          <div class="avatar">{{ review.name[0]|upper }}</div>
+          <div>
+            <strong>{{ review.name or "Anonymous" }}</strong><br>
+            <span>
+              {% for i in range(1,6) %}
+                <span style="color:{{ 'orange' if i <= review.rating|int else '#ddd' }}">&#9733;</span>
+              {% endfor %}
+            </span>
+          </div>
+        </div>
+        <div class="review-text">{{ review.text }}</div>
+        {% if review.image_url %}
+        <img src="{{ review.image_url }}" class="review-card-img" />
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<!-- Review Modal code here (same as before) -->
+{% endblock %}
