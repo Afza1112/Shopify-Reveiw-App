@@ -1,12 +1,12 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, redirect, url_for
 from models.review import get_reviews
 
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def home():
-    # Redirect to a sample product's Amazon-style reviews
-    return render_template("base.html")
+    # Redirect to a sample product's Amazon-style reviews page (change 123 to any real product id)
+    return redirect(url_for('main.review_amazon', product_id=123))
 
 @main_bp.route('/reviews/<product_id>')
 def review_amazon(product_id):
