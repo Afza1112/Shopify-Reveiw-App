@@ -2,6 +2,38 @@
 {% block content %}
 <div class="amazon-reviews-box">
     <h2>Customer reviews</h2>
+    <div class="review-product-box">
+    <h2>Review this product</h2>
+    <p>Share your thoughts with other customers</p>
+    <button class="amazon-review-btn" onclick="document.getElementById('review-modal').style.display='block'">
+        Write a customer review
+    </button>
+</div>
+
+<!-- Review Modal -->
+<div id="review-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <span class="close" onclick="document.getElementById('review-modal').style.display='none'">&times;</span>
+    <form id="review-form" enctype="multipart/form-data">
+        <label>Name:</label>
+        <input type="text" name="name" required><br>
+        <label>Rating:</label>
+        <select name="rating" required>
+            <option value="">Select...</option>
+            {% for i in range(5,0,-1) %}
+                <option value="{{ i }}">{{ i }} star</option>
+            {% endfor %}
+        </select><br>
+        <label>Review:</label>
+        <textarea name="text" required></textarea><br>
+        <label>Photo (optional):</label>
+        <input type="file" name="image"><br>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="review-msg"></div>
+  </div>
+</div>
+
     <div class="amazon-summary">
         <span style="font-size:2rem;">{{ avg_rating }} out of 5</span>
         <span class="star-bar">
@@ -54,3 +86,22 @@
     {% endfor %}
 </div>
 {% endblock %}
+
+<script>
+document.getElementById('review-form').onsubmit = async function(e) {
+    e.preventDefault();
+    var formData = new FormData(this);
+    const res = await fetch('/api/review', {
+        method: 'POST',
+        body: formData
+    });
+    const data = await res.json();
+    document.getElementById('review-msg').innerText = data.message || "Submitted!";
+    if(data.message && data.message.includes("pending")) {
+        setTimeout(() => {
+            document.getElementById('review-modal').style.display='none';
+            location.reload();
+        }, 1800);
+    }
+};
+</script>
