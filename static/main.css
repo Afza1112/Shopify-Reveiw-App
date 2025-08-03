@@ -352,6 +352,58 @@ input[type="file"] {
 .modal-content .close {
     position: absolute; right: 12px; top: 8px; font-size: 24px; cursor: pointer;
 }
+.amazon-page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 2rem;
+}
+.amazon-columns {
+  display: flex;
+  gap: 2rem;
+  max-width: 1200px;
+  width: 100%;
+}
+.left-panel {
+  flex: 0 0 350px;
+  background: #fff;
+  padding: 2rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #eee;
+}
+.right-panel {
+  flex: 1 1 0%;
+  background: #fff;
+  padding: 2rem 2rem 2rem 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px #eee;
+}
+.rating-summary { margin-bottom: 1rem; font-size: 1.1rem; }
+.stars { font-size: 1.3rem; }
+.ratings-bar { margin-bottom: 2rem; }
+.star-row { display: flex; align-items: center; gap: 0.7rem; margin-bottom: 0.3rem; }
+.bar-bg { width: 80px; height: 10px; background: #eee; border-radius: 3px; margin: 0 5px;}
+.bar-fill { height: 100%; background: orange; border-radius: 3px; }
+.review-this-product { margin-top: 2rem; }
+.amazon-review-btn {
+  display: block; width: 100%; padding: 0.7rem;
+  border: 1px solid #ccc; background: #fff; border-radius: 2rem;
+  font-size: 1.1rem; cursor: pointer;
+  transition: background 0.2s;
+}
+.amazon-review-btn:hover { background: #f4f4f4; }
+.review-images { display: flex; gap: 10px; margin-bottom: 2rem; }
+.review-img { width: 100px; height: 100px; object-fit: cover; border-radius: 6px; border: 1px solid #eee; }
+.review-card { margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eee; }
+.review-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 0.4rem; }
+.avatar { width: 36px; height: 36px; border-radius: 50%; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+.review-text { margin-bottom: 0.5rem; }
+.review-card-img { width: 80px; margin-top: 0.2rem; border-radius: 6px; border: 1px solid #eee; }
+@media (max-width: 900px) {
+  .amazon-columns { flex-direction: column; }
+  .left-panel, .right-panel { width: 100%; max-width: 100%; }
+}
+
 
 
 
