@@ -10,7 +10,7 @@ def allowed_file(filename):
 
 @review_bp.route('/review/<product_id>')
 def review_form(product_id):
-    return render_template('review_form.html', product_id=product_id)
+    return render_template('reviews_amazon.html', product_id=product_id)
 
 @review_bp.route('/api/review', methods=['POST'])
 def submit_review():
@@ -36,3 +36,4 @@ def api_reviews(product_id):
     reviews = get_reviews(product_id, approved=True)
     return jsonify(reviews)
     
+
