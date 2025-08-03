@@ -1,20 +1,18 @@
 from flask import Blueprint, render_template
-from models.review import get_reviews  # Make sure this is in models/review.py!
+from models.review import get_reviews
 
 main_bp = Blueprint('main', __name__)
 
 @main_bp.route('/')
 def home():
-    # Home with links to a sample product and admin, rendered using base.html for styling
-    return render_template("base.html", title="Shopify Review App")
+    # Redirect to a sample product's Amazon-style reviews
+    return render_template("base.html")
 
-# Amazon-style Review Page
-@main_bp.route('/reviews/amazon/<product_id>')
+@main_bp.route('/reviews/<product_id>')
 def review_amazon(product_id):
     reviews = get_reviews(product_id, approved=True)
-    # Calculate average rating, total, and star breakdown for display
-    avg_rating = 0
     total_reviews = len(reviews)
+    avg_rating = 0
     star_counts = {i: 0 for i in range(1, 6)}
     for r in reviews:
         rating = int(r.get("rating", 0))
