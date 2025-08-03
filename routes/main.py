@@ -24,11 +24,14 @@ def review_amazon(product_id):
     star_perc = {k: round((v / total_reviews) * 100, 1) if total_reviews else 0 for k, v in star_counts.items()}
 
     return render_template(
-        "reviews_amazon.html",
-        reviews=reviews,
-        avg_rating=avg_rating,
-        total_reviews=total_reviews,
-        star_perc=star_perc
-        product_id=product_id
+    "reviews_amazon.html",
+    reviews=reviews,
+    avg_rating=avg_rating,
+    total_reviews=total_reviews,
+    star_perc=star_perc,
+    product_id=product_id  
+)
+
     )
+
 
