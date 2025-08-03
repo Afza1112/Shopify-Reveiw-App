@@ -14,11 +14,12 @@ admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin')
 def admin_panel():
+    """Show only pending reviews by default."""
     try:
         pending = get_pending_reviews()
         for r in pending:
             r['_id'] = str(r.get('_id', ''))
-        return render_template("admin.html", reviews=pending)
+        return render_template("admin.html", reviews=pending, show_all=False)
     except Exception as e:
         return f"Admin Error: {str(e)}", 500
 
@@ -75,9 +76,9 @@ def delete_review_admin(review_id):
     except Exception as e:
         return f"Delete Error: {str(e)}", 500
 
-# Optional: List all reviews, not just pending
 @admin_bp.route('/admin/all')
 def all_reviews():
+    """Show all reviews (pending, approved, rejected) in one table."""
     try:
         reviews = get_all_reviews()
         for r in reviews:
