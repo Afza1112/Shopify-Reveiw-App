@@ -1,97 +1,186 @@
 {% extends 'base.html' %}
-
 {% block title %}Admin Panel - Manage Reviews{% endblock %}
 
 {% block content %}
-<div class="admin-container">
-    <h2 style="margin-bottom: 1.2rem;">🛠️ Admin Review Panel</h2>
+<div class="admin-dashboard">
+  <!-- SIDEBAR -->
+  <div class="admin-sidebar">
+    <h2>Admin</h2>
+    <nav class="admin-nav">
+      <ul>
+        <li><a href="{{ url_for('admin.admin_panel') }}" class="active">Reviews</a></li>
+        <li><a href="#">Accounts</a></li>
+        <li><a href="#">Settings</a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer">Advanced Review System<br>Version 2.1.0</div>
+  </div>
 
-    {% if reviews and reviews|length > 0 %}
-        {% for review in reviews %}
-        <div class="review admin-review">
-            <div class="review-header" style="gap:18px;">
-                <span class="review-productid"><b>Product ID:</b> {{ review['product_id'] }}</span>
-                <span class="review-rating">
-                    {% for i in range(1, 6) %}
-                        {% if i <= review['rating']|int %}
-                        <span class="star">&#9733;</span>
-                        {% else %}
-                        <span class="star inactive">&#9733;</span>
-                        {% endif %}
-                    {% endfor %}
-                </span>
-                <span>
-                  {% if review['approved'] %}
-                    <span class="verified-badge" style="background:#e0f7e9; color:#21b87a;">Approved</span>
-                  {% elif review['rejected'] %}
-                    <span class="verified-badge" style="background:#ffebeb; color:#db4437;">Rejected</span>
-                  {% else %}
-                    <span class="verified-badge" style="background:#fff5d7; color:#de9200;">Pending</span>
-                  {% endif %}
-                </span>
-            </div>
-            <div class="review-info" style="margin-bottom:7px;">
-                <b>Name:</b> {{ review['name'] }}<br>
-                <b>Review:</b> {{ review['text'] or review['message'] }}<br>
-                {% if review.get('image_url') %}
-                  <img src="{{ review['image_url'] }}" alt="User Product Pic" class="review-img" style="margin:7px 0;">
+  <!-- MAIN PANEL -->
+  <div class="admin-main">
+    <div class="admin-header">
+      <span class="admin-title">Reviews</span>
+      <div class="admin-actions">
+        <input type="text" placeholder="Search review..." id="review-search" class="admin-search-input" style="padding:7px 14px;border-radius:6px;border:1px solid #e3e7f2;">
+        <!-- Example import/export:
+        <button class="admin-btn">Import</button>
+        <button class="admin-btn">Export</button>
+        -->
+      </div>
+    </div>
+
+    <!-- Flash Messages (optional) -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash-message {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <div class="admin-table-container">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Product ID</th>
+            <th>Content</th>
+            <th>Rating</th>
+            <th>Status</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% if reviews %}
+          {% for review in reviews %}
+            <tr>
+              <td>
+                <span class="admin-avatar">{{ review.name[0]|upper if review.name else "U" }}</span>
+                {{ review.name or "Unknown" }}
+              </td>
+              <td>{{ review.product_id }}</td>
+              <td>
+                {{ review.text or review.message }}
+                {% if review.image_url %}
+                  <br>
+                  <img src="{{ review.image_url }}" class="review-img" alt="Review image">
                 {% endif %}
-                {% if review.get('admin_reply') %}
-                  <div style="background:#f7fafd;padding:8px 14px;border-radius:7px;margin:7px 0 0 0;">
-                    <b>Admin Reply:</b> {{ review['admin_reply'] }}
+                {% if review.admin_reply %}
+                  <div style="margin-top:8px;color:#1ca56c;font-size:.98rem;">
+                    <b>Reply:</b> {{ review.admin_reply }}
                   </div>
                 {% endif %}
-            </div>
-            <div class="review-actions" style="display:flex;gap:12px;flex-wrap:wrap;">
-
-                <!-- Approve -->
-                {% if not review['approved'] and not review['rejected'] %}
-                <form method="POST" action="/admin/approve/{{ review['_id'] }}">
-                    <button type="submit" class="submit-btn" style="background:#43a047;">Approve</button>
-                </form>
-                <!-- Reject -->
-                <form method="POST" action="/admin/reject/{{ review['_id'] }}">
-                    <button type="submit" class="submit-btn" style="background:#db4437;">Reject</button>
-                </form>
+              </td>
+              <td>
+                <span class="stars">
+                  {% for i in range(1,6) %}
+                    {% if i <= (review.rating|int) %}
+                      &#9733;
+                    {% else %}
+                      <span style="color:#ccc">&#9733;</span>
+                    {% endif %}
+                  {% endfor %}
+                </span>
+              </td>
+              <td>
+                {% if review.approved %}
+                  <span class="admin-badge">Approved</span>
+                {% elif review.rejected %}
+                  <span class="admin-badge rejected">Rejected</span>
+                {% else %}
+                  <span class="admin-badge pending">Pending</span>
                 {% endif %}
+              </td>
+              <td>
+                {% if review.created_at %}
+                  {{ review.created_at|datetimeformat }}
+                {% else %}
+                  --
+                {% endif %}
+              </td>
+              <td>
+                <div class="admin-actions-list">
+                  {% if not review.approved and not review.rejected %}
+                    <form method="POST" action="{{ url_for('admin.approve_review', review_id=review._id) }}">
+                      <button type="submit" class="admin-action-link">Approve</button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.reject_review', review_id=review._id) }}">
+                      <button type="submit" class="admin-action-link" style="color:#e33d2e;">Reject</button>
+                    </form>
+                  {% endif %}
+                  <!-- Amend/Reply modal triggers (could be modals, or link to a page) -->
+                  <a href="#" class="admin-action-link" onclick="openAmendModal('{{ review._id }}', '{{ review.text|escapejs or review.message|escapejs }}');return false;">Amend</a>
+                  <a href="#" class="admin-action-link reply" onclick="openReplyModal('{{ review._id }}');return false;">Reply</a>
+                  <form method="POST" action="{{ url_for('admin.delete_review_admin', review_id=review._id) }}" onsubmit="return confirm('Delete this review?');">
+                    <button type="submit" class="admin-action-link delete">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="7" style="text-align:center;color:#888;">No reviews found.</td>
+          </tr>
+        {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
 
-                <!-- Edit/Amend -->
-                <button class="submit-btn" style="background:#f5b942;" onclick="toggleEdit('{{ review['_id'] }}')">Amend</button>
-
-                <!-- Reply -->
-                <button class="submit-btn" style="background:#3165d4;" onclick="toggleReply('{{ review['_id'] }}')">Reply</button>
-            </div>
-            
-            <!-- Amend Review Form (Hidden by default) -->
-            <form id="edit-form-{{ review['_id'] }}" class="admin-edit-form" method="POST" action="/admin/amend/{{ review['_id'] }}" style="display:none;margin-top:10px;">
-                <label>Edit Review:</label>
-                <textarea name="text" style="width:100%;min-height:50px;border-radius:6px;">{{ review['text'] or review['message'] }}</textarea>
-                <button type="submit" class="submit-btn" style="margin-top:8px;">Save Changes</button>
-            </form>
-
-            <!-- Reply Form (Hidden by default) -->
-            <form id="reply-form-{{ review['_id'] }}" class="admin-reply-form" method="POST" action="/admin/reply/{{ review['_id'] }}" style="display:none;margin-top:8px;">
-                <label>Admin Reply:</label>
-                <input type="text" name="reply" class="field" style="width:100%;border-radius:6px;" maxlength="240" required>
-                <button type="submit" class="submit-btn" style="margin-top:7px;">Send Reply</button>
-            </form>
-        </div>
-        {% endfor %}
-    {% else %}
-        <div style="padding:2rem 0;font-size:1.1rem;color:#888;">No reviews found.</div>
-    {% endif %}
+<!-- Optional: Modal for amend/reply (JS required to show/hide) -->
+<div id="amend-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <form id="amend-form" method="POST">
+      <h3>Amend Review</h3>
+      <textarea name="amend_text" id="amend_text" style="width:100%;height:80px;" required></textarea>
+      <button type="submit" class="admin-btn" style="margin-top:10px;">Save</button>
+      <button type="button" class="admin-btn" style="background:#eee;color:#333;margin-left:7px;" onclick="closeAmendModal()">Cancel</button>
+    </form>
+  </div>
+</div>
+<div id="reply-modal" class="modal" style="display:none;">
+  <div class="modal-content">
+    <form id="reply-form" method="POST">
+      <h3>Reply to Review</h3>
+      <textarea name="reply_text" id="reply_text" style="width:100%;height:80px;" required></textarea>
+      <button type="submit" class="admin-btn" style="margin-top:10px;">Send Reply</button>
+      <button type="button" class="admin-btn" style="background:#eee;color:#333;margin-left:7px;" onclick="closeReplyModal()">Cancel</button>
+    </form>
+  </div>
 </div>
 
 <script>
-function toggleEdit(id) {
-    var form = document.getElementById('edit-form-' + id);
-    if (form.style.display === "none") form.style.display = "block";
-    else form.style.display = "none";
+// Modal handlers (basic, for demo - improve as needed)
+let amendModal = document.getElementById('amend-modal');
+let replyModal = document.getElementById('reply-modal');
+let amendForm = document.getElementById('amend-form');
+let replyForm = document.getElementById('reply-form');
+let currentReviewId = '';
+
+function openAmendModal(reviewId, text) {
+  amendModal.style.display = 'flex';
+  amendForm.action = '/admin/amend/' + reviewId;
+  document.getElementById('amend_text').value = text || '';
 }
-function toggleReply(id) {
-    var form = document.getElementById('reply-form-' + id);
-    if (form.style.display === "none") form.style.display = "block";
-    else form.style.display = "none";
+function closeAmendModal() {
+  amendModal.style.display = 'none';
+  amendForm.action = '';
+}
+function openReplyModal(reviewId) {
+  replyModal.style.display = 'flex';
+  replyForm.action = '/admin/reply/' + reviewId;
+  document.getElementById('reply_text').value = '';
+}
+function closeReplyModal() {
+  replyModal.style.display = 'none';
+  replyForm.action = '';
+}
+window.onclick = function(event) {
+  if(event.target === amendModal) closeAmendModal();
+  if(event.target === replyModal) closeReplyModal();
 }
 </script>
 {% endblock %}
