@@ -1,26 +1,30 @@
 {% extends 'base.html' %}
+{% block title %}Admin Login{% endblock %}
+
 {% block content %}
-<div class="login-container">
-    <form method="POST" class="login-form">
-        <h2>Admin Login</h2>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, msg in messages %}
-                <div class="flash-message {{ category }}">{{ msg }}</div>
-            {% endfor %}
-        {% endif %}
-        {% endwith %}
-        <input type="text" name="username" placeholder="Username" required autofocus>
-        <input type="password" name="password" placeholder="Password" required>
-        <button type="submit">Log In</button>
+<div class="login-page">
+  <div class="login-container">
+    <h2 class="login-title">Admin Login</h2>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, msg in messages %}
+          <div class="flash-message {{ category }}">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    <form method="POST" class="login-form" autocomplete="off">
+      <div class="login-field">
+        <label for="username">Username</label>
+        <input type="text" name="username" id="username" required autofocus maxlength="40" class="login-input">
+      </div>
+      <div class="login-field">
+        <label for="password">Password</label>
+        <input type="password" name="password" id="password" required maxlength="40" class="login-input">
+      </div>
+      <button type="submit" class="login-btn">Sign In</button>
     </form>
+  </div>
 </div>
-<style>
-.login-container { min-height: 90vh; display: flex; align-items: center; justify-content: center; }
-.login-form { background: #fff; padding: 32px 28px 24px 28px; border-radius: 10px; box-shadow: 0 2px 16px #2345be17; width: 330px; }
-.login-form h2 { margin-bottom: 24px; text-align: center; }
-.login-form input { width: 100%; margin-bottom: 15px; padding: 10px; font-size: 1.1rem; border: 1px solid #e3e7f2; border-radius: 6px; }
-.login-form button { width: 100%; background: #2246c5; color: #fff; border: none; padding: 10px; font-size: 1.1rem; border-radius: 6px; font-weight: 600; }
-.flash-message { background: #ffeaea; color: #e23a20; border-radius: 7px; padding: 11px 10px; margin-bottom: 13px; text-align: center; }
-</style>
 {% endblock %}
