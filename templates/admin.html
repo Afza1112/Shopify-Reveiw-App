@@ -8,13 +8,14 @@
     <h2>Admin</h2>
     <nav class="admin-nav">
       <ul>
-        <li><a href="{{ url_for('admin.admin_panel') }}" class="active">Reviews</a></li>
+        <li><a href="{{ url_for('admin.admin_panel') }}" class="{% if not show_all %}active{% endif %}">Pending Reviews</a></li>
+        <li><a href="{{ url_for('admin.all_reviews') }}" class="{% if show_all %}active{% endif %}">All Reviews</a></li>
         <li><a href="#">Accounts</a></li>
         <li><a href="#">Settings</a></li>
       </ul>
     </nav>
-    <div class="sidebar-footer">Advanced Review System<br>Version 2.1.0</div>
-  </div>
+    <div class="sidebar-footer">Paksa Review System<br>Version 2.1.0</div>
+</div>
 
   <!-- MAIN PANEL -->
   <div class="admin-main">
