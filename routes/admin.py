@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, request, flash
+from flask import Blueprint, render_template, redirect, url_for, request, flash, session
 from models.review import (
     get_pending_reviews,
     approve_review_db,
@@ -9,9 +9,10 @@ from models.review import (
     get_all_reviews,
     delete_review
 )
-from flask import session
+from functools import wraps
+
+# --- Login required decorator ---
 def login_required(func):
-    from functools import wraps
     @wraps(func)
     def wrapper(*args, **kwargs):
         if not session.get('admin_logged_in'):
@@ -102,5 +103,3 @@ def delete_review_admin(review_id):
         return redirect(url_for('admin.admin_panel'))
     except Exception as e:
         return f"Delete Error: {str(e)}", 500
-
-
