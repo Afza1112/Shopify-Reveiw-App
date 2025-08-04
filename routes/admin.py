@@ -23,6 +23,17 @@ def admin_panel():
     except Exception as e:
         return f"Admin Error: {str(e)}", 500
 
+@admin_bp.route('/admin/all')
+def all_reviews():
+    """Show all reviews (pending, approved, rejected) in one table."""
+    try:
+        reviews = get_all_reviews()
+        for r in reviews:
+            r['_id'] = str(r.get('_id', ''))
+        return render_template("admin.html", reviews=reviews, show_all=True)
+    except Exception as e:
+        return f"Admin Error: {str(e)}", 500
+
 @admin_bp.route('/admin/approve/<review_id>', methods=['POST'])
 def approve_review(review_id):
     try:
@@ -31,16 +42,6 @@ def approve_review(review_id):
         return redirect(url_for('admin.admin_panel'))
     except Exception as e:
         return f"Approval Error: {str(e)}", 500
-        
-@admin_bp.route('/admin/all')
-def all_reviews():
-    try:
-        reviews = get_all_reviews()
-        for r in reviews:
-            r['_id'] = str(r.get('_id', ''))
-        return render_template("admin.html", reviews=reviews, show_all=True)
-    except Exception as e:
-        return f"Admin Error: {str(e)}", 500
 
 @admin_bp.route('/admin/reject/<review_id>', methods=['POST'])
 def reject_review(review_id):
@@ -85,15 +86,3 @@ def delete_review_admin(review_id):
         return redirect(url_for('admin.admin_panel'))
     except Exception as e:
         return f"Delete Error: {str(e)}", 500
-
-@admin_bp.route('/admin/all')
-def all_reviews():
-    """Show all reviews (pending, approved, rejected) in one table."""
-    try:
-        reviews = get_all_reviews()
-        for r in reviews:
-            r['_id'] = str(r.get('_id', ''))
-        return render_template("admin.html", reviews=reviews, show_all=True)
-    except Exception as e:
-        return f"Admin Error: {str(e)}", 500
-
