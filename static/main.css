@@ -414,6 +414,9 @@ input[type="file"] {
   min-width: 200px;
   border-radius: 16px 0 0 16px;
 }
+.admin-dashboard { display: flex; min-height: 100vh; }
+.admin-sidebar { ... }
+.admin-main { flex: 1; ... }
 .admin-sidebar h2 { margin-bottom: 22px; font-size: 1.4rem; }
 .admin-sidebar ul { list-style: none; padding: 0; }
 .admin-sidebar ul li { margin-bottom: 15px; }
@@ -645,6 +648,7 @@ input[type="file"] {
   .admin-sidebar { width: 100%; flex-direction: row; min-height: 0; }
   .admin-main { padding: 10px 1vw; }
 }
+
 
 
 
