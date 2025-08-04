@@ -23,6 +23,15 @@ def admin_panel():
     except Exception as e:
         return f"Admin Error: {str(e)}", 500
 
+def login_required(func):
+    from functools import wraps
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('auth.login'))
+        return func(*args, **kwargs)
+    return wrapper
+
 @admin_bp.route('/admin/all')
 def all_reviews():
     """Show all reviews (pending, approved, rejected) in one table."""
@@ -86,3 +95,4 @@ def delete_review_admin(review_id):
         return redirect(url_for('admin.admin_panel'))
     except Exception as e:
         return f"Delete Error: {str(e)}", 500
+
