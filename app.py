@@ -2,6 +2,8 @@ from flask import Flask
 from config import Config
 from routes import register_blueprints
 from datetime import datetime
+from routes.auth import auth_bp
+
 
 def datetimeformat(value):
     """Convert UNIX timestamp (int/str) to readable date string."""
@@ -17,6 +19,7 @@ def create_app():
     register_blueprints(app)
     # Register the filter AFTER app is created
     app.jinja_env.filters['datetimeformat'] = datetimeformat
+    app.register_blueprint(auth_bp)
     return app
 
 app = create_app()  # This line is crucial for Gunicorn/production
