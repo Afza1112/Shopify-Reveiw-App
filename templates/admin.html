@@ -16,6 +16,7 @@
         <li><a href="{{ url_for('admin.all_reviews') }}" class="{% if show_all %}active{% endif %}">All Reviews</a></li>
         <li><a href="#">Accounts</a></li>
         <li><a href="#">Settings</a></li>
+        <li><a href="{{ url_for('auth.logout') }}" style="color:#e33d2e;font-weight:600;">Logout</a></li>
       </ul>
     </nav>
     <div class="sidebar-footer">Paksa Review System<br>Version 2.1.0</div>
