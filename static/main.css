@@ -719,6 +719,13 @@ input[type="file"] {
   background: #1d4bc2;
 }
 
+.logo-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
 
 
 
