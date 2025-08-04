@@ -1,44 +1,54 @@
 {% extends "base.html" %}
-{% block title %}Paksa Review App - Home{% endblock %}
+{% block title %}Shopify Review Hub - Home{% endblock %}
 
 {% block content %}
-
-<div style="display:flex;justify-content:center;align-items:center;min-height:70vh;">
-  <div style="max-width:480px;width:100%;background:#fff;padding:44px 38px 32px 38px;border-radius:18px;box-shadow:0 8px 36px rgba(55,105,255,.07);text-align:center;">
-    <div class="logo-bar" >
-  <img src="{{ url_for('static', filename='Logo.png') }}" alt="Logo" class="site-logo">
-</div>
-    <h1 style="font-size:2.3rem;font-weight:700;margin-bottom:0.8rem;color:#232536;">
-      Welcome to Your Product Review Hub
+<div class="homepage-hero" style="display: flex; min-height: 80vh; align-items: center; justify-content: center; background: linear-gradient(90deg, #fafdff 60%, #e6f0fd 100%);">
+  <!-- LEFT: Content -->
+  <div class="homepage-left" style="flex: 1; max-width: 550px; padding-left: 60px;">
+    <img src="{{ url_for('static', filename='Logo.png') }}" alt="Logo" class="site-logo" style="height: 44px; margin-bottom: 38px;">
+    <h1 style="font-size: 3.1rem; font-weight: 800; color: #18204a; margin-bottom: 20px; line-height: 1.1;">
+      Power Up Your Shopify Store with Real Customer Reviews
     </h1>
-    <div style="margin-bottom:24px;color:#344356;font-size:1.13rem;">
-      Effortlessly collect, manage, and display customer reviews for your Shopify store.<br>
-      <span style="font-weight:500;">Search for any product below to view or add reviews.</span>
+    <div style="font-size: 1.19rem; color: #344356; margin-bottom: 32px; max-width: 420px;">
+      Effortlessly collect, manage, and showcase reviews for all your Shopify products—just like Amazon. 
+      Build trust, boost conversions, and create an authentic shopping experience for your customers.
     </div>
-    <form action="/reviews/" method="get" onsubmit="return goToProductReview();">
-      <input 
-        id="product-id-input"
-        type="text" 
-        placeholder="Enter Product ID" 
-        required
-        style="width:100%;padding:13px 13px;margin-bottom:14px;border-radius:7px;border:1px solid #e0e4eb;font-size:1.13rem;background:#f7fafd;">
-      <button type="submit" class="submit-btn" style="width:100%;margin-bottom:20px;">
-        View Reviews
-      </button>
+    <ul style="font-size:1.08rem; margin-bottom:36px; color:#38475b; padding-left:18px;">
+      <li style="margin-bottom:9px;">Amazon-style review displays for all products</li>
+      <li style="margin-bottom:9px;">Admin panel to approve, reply, amend, or reject reviews</li>
+      <li style="margin-bottom:9px;">Image support in reviews (showcase real customer photos)</li>
+      <li style="margin-bottom:9px;">Easy moderation, search, and review analytics</li>
+      <li style="margin-bottom:9px;">Beautiful responsive UI, instant updates, and more</li>
+    </ul>
+    <form action="{{ url_for('review_amazon') }}" method="get" style="max-width:420px;">
+      <input type="text" name="product_id" class="home-search" style="width:70%;padding:13px 17px;border-radius:6px;border:1px solid #dde8f5; font-size:1.08rem; margin-right:7px;" placeholder="Enter Product ID">
+      <button type="submit" class="cta-btn" style="padding:13px 25px; border-radius:6px; background: linear-gradient(90deg,#459bf7,#55c1ea); color:#fff; font-weight:600; font-size:1.1rem; border:none;">See Reviews</button>
     </form>
-    <a href="/admin" style="font-size:1.12rem;color:#3165d4;text-decoration:underline;font-weight:500;display:inline-block;">
-      Go to Admin Panel &rarr;
-    </a>
+  </div>
+  <!-- RIGHT: Illustration -->
+  <div class="homepage-right" style="flex:1;display:flex;align-items:center;justify-content:center;">
+    <img src="{{ url_for('static', filename='homepage-illustration.png') }}" alt="Shopify Reviews" style="max-width:98%;height:auto;">
   </div>
 </div>
-<script>
-function goToProductReview() {
-    var id = document.getElementById('product-id-input').value.trim();
-    if(!id) return false;
-    window.location.href = '/reviews/' + encodeURIComponent(id);
-    return false;
-}
-</script>
+
+<!-- Features Section (optional, below hero) -->
+<div class="feature-section" style="max-width:1100px;margin:60px auto 0 auto;padding:0 24px;">
+  <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:40px;">
+    <div class="feature-card" style="flex:1;min-width:220px;background:#fff;border-radius:12px;box-shadow:0 6px 32px #2577bb08;padding:32px 22px;text-align:center;">
+      <img src="{{ url_for('static', filename='star.svg') }}" alt="Reviews" style="height:36px;margin-bottom:11px;">
+      <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:9px;">Amazon-style Displays</h3>
+      <div style="color:#22314a;font-size:1.01rem;">Showcase product reviews just like top e-commerce stores.</div>
+    </div>
+    <div class="feature-card" style="flex:1;min-width:220px;background:#fff;border-radius:12px;box-shadow:0 6px 32px #2577bb08;padding:32px 22px;text-align:center;">
+      <img src="{{ url_for('static', filename='moderation.svg') }}" alt="Moderation" style="height:36px;margin-bottom:11px;">
+      <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:9px;">Full Moderation</h3>
+      <div style="color:#22314a;font-size:1.01rem;">Admin controls: Approve, amend, reject, or reply to every review.</div>
+    </div>
+    <div class="feature-card" style="flex:1;min-width:220px;background:#fff;border-radius:12px;box-shadow:0 6px 32px #2577bb08;padding:32px 22px;text-align:center;">
+      <img src="{{ url_for('static', filename='photo.svg') }}" alt="Photo Reviews" style="height:36px;margin-bottom:11px;">
+      <h3 style="font-size:1.25rem;font-weight:600;margin-bottom:9px;">Photo Reviews</h3>
+      <div style="color:#22314a;font-size:1.01rem;">Let buyers upload real photos for more credibility and trust.</div>
+    </div>
+  </div>
+</div>
 {% endblock %}
-
-
