@@ -9,10 +9,20 @@ from models.review import (
     get_all_reviews,
     delete_review
 )
+from flask import session
+def login_required(func):
+    from functools import wraps
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not session.get('admin_logged_in'):
+            return redirect(url_for('auth.login'))
+        return func(*args, **kwargs)
+    return wrapper
 
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin')
+@login_required
 def admin_panel():
     """Show only pending reviews by default."""
     try:
@@ -23,16 +33,8 @@ def admin_panel():
     except Exception as e:
         return f"Admin Error: {str(e)}", 500
 
-def login_required(func):
-    from functools import wraps
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        if not session.get('admin_logged_in'):
-            return redirect(url_for('auth.login'))
-        return func(*args, **kwargs)
-    return wrapper
-
 @admin_bp.route('/admin/all')
+@login_required
 def all_reviews():
     """Show all reviews (pending, approved, rejected) in one table."""
     try:
@@ -44,6 +46,7 @@ def all_reviews():
         return f"Admin Error: {str(e)}", 500
 
 @admin_bp.route('/admin/approve/<review_id>', methods=['POST'])
+@login_required
 def approve_review(review_id):
     try:
         approve_review_db(review_id)
@@ -53,6 +56,7 @@ def approve_review(review_id):
         return f"Approval Error: {str(e)}", 500
 
 @admin_bp.route('/admin/reject/<review_id>', methods=['POST'])
+@login_required
 def reject_review(review_id):
     try:
         reject_review_db(review_id)
@@ -62,6 +66,7 @@ def reject_review(review_id):
         return f"Reject Error: {str(e)}", 500
 
 @admin_bp.route('/admin/amend/<review_id>', methods=['POST'])
+@login_required
 def amend_review(review_id):
     try:
         new_text = request.form.get('amend_text', '').strip()
@@ -75,6 +80,7 @@ def amend_review(review_id):
         return f"Amend Error: {str(e)}", 500
 
 @admin_bp.route('/admin/reply/<review_id>', methods=['POST'])
+@login_required
 def reply_review(review_id):
     try:
         reply_text = request.form.get('reply_text', '').strip()
@@ -88,6 +94,7 @@ def reply_review(review_id):
         return f"Reply Error: {str(e)}", 500
 
 @admin_bp.route('/admin/delete/<review_id>', methods=['POST'])
+@login_required
 def delete_review_admin(review_id):
     try:
         delete_review(review_id)
@@ -95,4 +102,5 @@ def delete_review_admin(review_id):
         return redirect(url_for('admin.admin_panel'))
     except Exception as e:
         return f"Delete Error: {str(e)}", 500
+
 
