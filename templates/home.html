@@ -20,7 +20,7 @@
       <li style="margin-bottom:9px;">Easy moderation, search, and review analytics</li>
       <li style="margin-bottom:9px;">Beautiful responsive UI, instant updates, and more</li>
     </ul>
-    <form action="{{ url_for('review_amazon') }}" method="get" style="max-width:420px;">
+    <form action="{{ url_for('reviews_amazon') }}" method="get" style="max-width:420px;">
       <input type="text" name="product_id" class="home-search" style="width:70%;padding:13px 17px;border-radius:6px;border:1px solid #dde8f5; font-size:1.08rem; margin-right:7px;" placeholder="Enter Product ID">
       <button type="submit" class="cta-btn" style="padding:13px 25px; border-radius:6px; background: linear-gradient(90deg,#459bf7,#55c1ea); color:#fff; font-weight:600; font-size:1.1rem; border:none;">See Reviews</button>
     </form>
@@ -52,5 +52,6 @@
   </div>
 </div>
 {% endblock %}
+
 
 
